@@ -1,21 +1,63 @@
 version: '3'
 
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-13}-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
-      POSTGRES_USER: ${POSTGRES_USER:-symfony}
+  apache:
+    build: ./docker/build/apache
+    container_name: thebetinstinct_apache
+    ports:
+      - 9000:80
+      - 4430:443
+    restart: always
+    depends_on:
+      - mysql
     volumes:
-      - db-data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
+      - ./app/symfony:/var/www/symfony:cached
+      - ./docker/etc/php/php.ini:/usr/local/etc/php/php.ini:ro
+      - ./docker/etc/php/php-cli.ini:/usr/local/etc/php/php-cli.ini:ro
+      - ./docker/etc/apache/default-ssl.conf:/etc/apache2/sites-enabled/default-ssl.conf:ro
+  mysql:
+    platform: linux/x86_64
+    image: 'mysql:5.7'
+    container_name: thebetinstinct_mysql
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_DATABASE=thebetinstinct_db
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - './docker/etc/mysql/my.conf:/etc/mysql/conf.d/my.conf'
+      - './docker/etc/mysql/data/:/var/data'
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: thebetinstinct_phpmyadmin
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - 8001:80
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+      - UPLOAD_LIMIT=500M
+  maildev:
+    image: maildev/maildev
+    restart: always
+    command: bin/maildev --web 1080 --smtp 1025 --hide-extensions STARTTLS
+    container_name: thebetinstinct_maildev
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+
+networks:
+  app-dev-symfony:
+    driver: bridge
 
 volumes:
-###> doctrine/doctrine-bundle ###
-  db-data:
-###< doctrine/doctrine-bundle ###
+  mysql-data: null
+
+
+

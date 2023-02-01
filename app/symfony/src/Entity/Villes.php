@@ -4,9 +4,17 @@ namespace App\Entity;
 
 use App\Repository\VillesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=VillesRepository::class)
+ * @ApiResource(
+ *     itemOperations={
+ *     "get"={"normalizationContext":{"groups"={"read:collection","read:ville","read:post"}}},
+ *     "put"={"denormalizationContext":{"groups"={"write:ville"}}}
+ *     }
+ * )
  */
 class Villes
 {
@@ -14,16 +22,19 @@ class Villes
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"read:collection"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"read:collection","write:ville"})
      */
     private $name;
 
     /**
      * @ORM\ManyToOne(targetEntity=Pays::class, inversedBy="villes")
+     * @Groups({"read:ville"})
      */
     private $pays;
 
