@@ -56,7 +56,7 @@ RUN curl -sSk https://getcomposer.org/installer | php -- --disable-tls && \
 #################################
 #### Symfony CLI
 #################################
-RUN wget https://get.symfony.com/cli/installer -O - | bash
+RUN wget https://get.symfony.com/cli/installer -O - | bash && mv /root/.symfony5 /usr/local/bin/symfony
 
 #################################
 #### Project
