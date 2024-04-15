@@ -25,7 +25,7 @@ class HomeController extends AbstractController
                 'pays' => $pays
             ]);
         }catch(Exception $e){
-            return new Response($e->getMessage());
+            return new Response("erreur ".$e->getMessage());
         }
     }
 }
