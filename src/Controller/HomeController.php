@@ -13,7 +13,7 @@ class HomeController extends AbstractController
     /**
      * @Route("/", name="app_home")
      */
-    public function index(PaysRepository $paysRepository)
+    public function home(PaysRepository $paysRepository)
     {
 
         try{
